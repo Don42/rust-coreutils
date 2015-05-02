@@ -1,0 +1,8 @@
+[project]
+name = "rust-coreutils"
+version = "0.0.1"
+authors = ["don <don@0xbeef.org>"]
+
+[[bin]]
+name = "false"
+path = "src/false/false.rs"
