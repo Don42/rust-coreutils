@@ -9,8 +9,8 @@ use std::env;
 
     Exit with a status code indicating failure.
 
-        --help     display this help and exit
-        --version  output version information and exit";
+    --help     display this help and exit
+    --version  output version information and exit";
 
 fn main(){
     let args: Vec<_> = env::args().collect();
@@ -21,5 +21,6 @@ fn main(){
             _ => print!(""),
         }
     }
-    std::env::set_exit_status(1);
+
+    std::env::set_exit_status(0);
 }

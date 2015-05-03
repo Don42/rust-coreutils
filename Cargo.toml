@@ -6,3 +6,7 @@ authors = ["don <don@0xbeef.org>"]
 [[bin]]
 name = "false"
 path = "src/false/false.rs"
+
+[[bin]]
+name = "true"
+path = "src/true/true.rs"
