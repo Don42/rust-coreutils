@@ -12,7 +12,7 @@ use std::env;
         --help     display this help and exit
         --version  output version information and exit";
 
-fn main(){
+fn main() {
     let args: Vec<_> = env::args().collect();
     if args.len() == 2 {
         match args[1].as_str() {
