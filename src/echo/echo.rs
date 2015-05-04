@@ -1,9 +1,10 @@
+#![feature(collections)]
 use std::env;
 
 fn main() {
-    let mut args: Vec<String> = env::args().collect();
-    args.remove(0);
-    for argument in args.iter() {
+    let args: Vec<String> = env::args().collect();
+
+    for argument in args.tail() {
         print!("{} ", argument);
     }
     print!("\n");
