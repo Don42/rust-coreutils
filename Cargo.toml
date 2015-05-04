@@ -3,6 +3,9 @@ name = "rust-coreutils"
 version = "0.0.1"
 authors = ["don <don@0xbeef.org>"]
 
+[dependencies]
+getopts = "0.2.10"
+
 [[bin]]
 name = "echo"
 path = "src/echo/echo.rs"
