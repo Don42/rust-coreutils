@@ -15,5 +15,9 @@ name = "false"
 path = "src/false/false.rs"
 
 [[bin]]
+name = "touch"
+path = "src/touch/touch.rs"
+
+[[bin]]
 name = "true"
 path = "src/true/true.rs"
