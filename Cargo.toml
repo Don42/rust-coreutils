@@ -5,6 +5,8 @@ authors = ["don <don@0xbeef.org>"]
 
 [dependencies]
 getopts = "0.2.10"
+docopt = "*"
+rustc-serialize = "*"
 
 [[bin]]
 name = "echo"
