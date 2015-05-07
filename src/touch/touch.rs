@@ -1,9 +1,11 @@
+#![feature(fs_time)]
 extern crate rustc_serialize;
 extern crate docopt;
+extern crate time;
 
 use docopt::Docopt;
 use std::fs::OpenOptions;
-use std::io::Write;
+use std::fs::set_file_times;
 
 static USAGE: &'static str = "
 Usage: touch <file>...
@@ -19,7 +21,7 @@ fn main() {
                              .and_then(|d| d.decode())
                              .unwrap_or_else(|e| e.exit());
     for name in args.arg_file {
-        let mut f = match OpenOptions::new()
+        match OpenOptions::new()
                                      .read(true)
                                      .create(true)
                                      .open(&name) {
@@ -27,14 +29,10 @@ fn main() {
                 println!("Couldn't open {}: {}", &name, e);
                 return;
             },
-            Ok(f) => f,
-        };
-        match f.write_all(b"") {
-            Err(e) => {
-                println!("Couldn't write {}: {}", &name, e);
-                continue;
-            },
             Ok(_) => (),
         };
+        let now = (time::get_time().sec * 1000) as u64;
+        std::fs::set_file_times(std::path::Path::new(&name), now, now)
+         .unwrap_or_else(|e| println!("Couldn't write {}: {}", &name, e));
     }
 }

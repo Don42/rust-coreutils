@@ -7,6 +7,7 @@ authors = ["don <don@0xbeef.org>"]
 getopts = "0.2.10"
 docopt = "*"
 rustc-serialize = "*"
+time = "*"
 
 [[bin]]
 name = "echo"
