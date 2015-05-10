@@ -7,6 +7,8 @@ use docopt::Docopt;
 use std::fs::OpenOptions;
 use std::fs::set_file_times;
 use std::os::unix::fs::MetadataExt;
+use std::error::Error;
+use std::io::ErrorKind;
 
 static USAGE: &'static str = "
 Usage: touch [options] <file>...
@@ -33,7 +35,6 @@ fn get_metadata(file_name: &String)
                              .read(true)
                              .open(&file_name) {
         Err(e) => {
-            println!("Couldn't open {}: {}", &file_name, e);
             return Err(e);
         },
         Ok(f) => f,
@@ -63,7 +64,7 @@ fn main() {
                                      .create(true)
                                      .open(&name) {
                 Err(e) => {
-                    println!("Couldn't open {}: {}", &name, e);
+                    print_io_error(e.kind(), name, args.flag_no_create);
                     continue;
                 },
                 Ok(_) => (),
@@ -80,9 +81,7 @@ fn main() {
                     else {
             match file_meta {
                 Err(e) => {
-                    if !args.flag_no_create {
-                        println!("Couldn't access metadata for {}: {}", &name, e);
-                    }
+                    print_io_error(e.kind(), name, args.flag_no_create);
                     continue;
                 },
                 Ok((a, _)) => a,
@@ -92,9 +91,7 @@ fn main() {
                     else {
             match file_meta {
                 Err(e) => {
-                    if !args.flag_no_create {
-                        println!("Couldn't access metadata for {}: {}", &name, e);
-                    }
+                    print_io_error(e.kind(), name, args.flag_no_create);
                     continue;
                 },
                 Ok((_, m)) => m,
@@ -102,12 +99,20 @@ fn main() {
         } as u64;
 
         match std::fs::set_file_times(std::path::Path::new(&name), atime, mtime) {
-            Err(e) => {
-                if !args.flag_no_create {
-                    println!("Couldn't write time for {}: {}", &name, e);
-                }
-            },
+            Err(e) => print_io_error(e.kind(), name, args.flag_no_create),
             Ok(_) => (),
         };
+    }
+}
+
+
+fn print_io_error(kind: ErrorKind, name: String, no_create: bool) {
+    match kind {
+        ErrorKind::NotFound => {
+            if !no_create {
+                    println!("IO Error on file {}: {:?}", &name, kind);
+            }
+        },
+        _ => println!("IO Error {}: {:?}", &name, kind),
     }
 }
