@@ -58,51 +58,62 @@ fn main() {
                              .unwrap_or_else(|e| e.exit());
 
     for name in args.arg_file {
-        if !args.flag_no_create {
-            match OpenOptions::new()
-                                     .read(true)
-                                     .create(true)
-                                     .open(&name) {
-                Err(e) => {
-                    print_io_error(e.kind(), name, args.flag_no_create);
-                    continue;
-                },
-                Ok(_) => (),
-            };
-        }
+        touch_file(name, args.flag_no_create, args.flag_a, args.flag_m);
+    }
+}
 
 
-        let now = {
-            let time_spec = time::get_time();
-            time_spec.sec * 1000 + (time_spec.nsec / 1_000_000) as i64
-            };
-        let file_meta = get_metadata(&name);
-        let atime = if args.flag_a || !args.flag_m {now}
-                    else {
-            match file_meta {
-                Err(e) => {
-                    print_io_error(e.kind(), name, args.flag_no_create);
-                    continue;
-                },
-                Ok((a, _)) => a,
-           }
-        } as u64;
-        let mtime = if args.flag_m || !args.flag_a {now}
-                    else {
-            match file_meta {
-                Err(e) => {
-                    print_io_error(e.kind(), name, args.flag_no_create);
-                    continue;
-                },
-                Ok((_, m)) => m,
-           }
-        } as u64;
-
-        match std::fs::set_file_times(std::path::Path::new(&name), atime, mtime) {
-            Err(e) => print_io_error(e.kind(), name, args.flag_no_create),
+fn touch_file(name: String, no_create: bool, flag_a: bool, flag_m: bool) {
+    if !no_create {
+        match OpenOptions::new()
+                                 .read(true)
+                                 .create(true)
+                                 .open(&name) {
+            Err(e) => {
+                print_io_error(e.kind(), name, no_create);
+                return;
+            },
             Ok(_) => (),
         };
     }
+
+    let (atime, mtime) = match decide_times(&name, flag_a, flag_m) {
+        Err(e) => {
+            print_io_error(e.kind(), name, no_create);
+            return;
+        },
+        Ok((a, m)) => (a, m),
+    };
+
+    match std::fs::set_file_times(std::path::Path::new(&name), atime, mtime) {
+        Err(e) => print_io_error(e.kind(), name, no_create),
+        Ok(_) => (),
+    };
+}
+
+
+fn decide_times(name: &String, flag_a: bool, flag_m: bool)
+    -> Result<(u64, u64), std::io::Error> {
+    let now = {
+        let time_spec = time::get_time();
+        time_spec.sec * 1000 + (time_spec.nsec / 1_000_000) as i64
+        };
+    let file_meta = get_metadata(&name);
+    let atime = if flag_a || !flag_m {now}
+                else {
+        match file_meta {
+            Err(e) => return Err(e),
+            Ok((a, _)) => a,
+       }
+    } as u64;
+    let mtime = if flag_m || !flag_a {now}
+                else {
+        match file_meta {
+            Err(e) => return Err(e),
+            Ok((_, m)) => m,
+       }
+    } as u64;
+    return Ok((atime, mtime));
 }
 
 
