@@ -10,6 +10,7 @@ use std::os::unix::fs::MetadataExt;
 use std::error::Error;
 use std::io::ErrorKind;
 
+
 static USAGE: &'static str = "
 Usage: touch [options] <file>...
 
@@ -18,6 +19,9 @@ Options:
     -c, --no-create     Do not create any files
     -f                  (ignored)
     -m                  Change modification time only
+        --time=<word>   change the specified time:
+                            <word> is access, atime, or use: equivalent to -a
+                            <word> is modify or mtime: equivalent to -m
 ";
 
 #[derive(RustcDecodable, Debug)]
@@ -27,28 +31,7 @@ struct Args {
     flag_f: bool,
     flag_a : bool,
     flag_m: bool,
-}
-
-fn get_metadata(file_name: &String)
-    -> Result<(i64, i64), std::io::Error> {
-    let f = match OpenOptions::new()
-                             .read(true)
-                             .open(&file_name) {
-        Err(e) => {
-            return Err(e);
-        },
-        Ok(f) => f,
-    };
-    match f.metadata() {
-        Err(e) => {
-            return Err(e)
-        },
-        Ok(m) => {
-            let meta = m.as_raw();
-            return Ok((meta.atime() * 1000 + (meta.atime_nsec() / 1_000_000),
-                       meta.mtime() * 1000 + (meta.mtime_nsec() / 1_000_000)));
-        },
-    };
+    flag_time: String,
 }
 
 
@@ -56,9 +39,27 @@ fn main() {
     let args: Args = Docopt::new(USAGE)
                              .and_then(|d| d.decode())
                              .unwrap_or_else(|e| e.exit());
+    let mut atime_flag: bool = args.flag_a;
+    let mut mtime_flag: bool = args.flag_m;
+
+    if args.flag_time == "" {
+        ();
+    } else if args.flag_time == "access" {
+        atime_flag = true;
+    }else if args.flag_time == "atime" {
+        atime_flag = true;
+    }else if args.flag_time == "use" {
+        atime_flag = true;
+    }else if args.flag_time == "modify" {
+        mtime_flag = true;
+    }else if args.flag_time == "mtime" {
+        mtime_flag = true;
+    }else {
+        println!("Error, {} not recognized", args.flag_time);
+    }
 
     for name in args.arg_file {
-        touch_file(name, args.flag_no_create, args.flag_a, args.flag_m);
+        touch_file(name, args.flag_no_create, atime_flag, mtime_flag);
     }
 }
 
@@ -90,6 +91,31 @@ fn touch_file(name: String, no_create: bool, flag_a: bool, flag_m: bool) {
         Ok(_) => (),
     };
 }
+
+
+fn get_metadata(file_name: &String)
+    -> Result<(i64, i64), std::io::Error> {
+    let f = match OpenOptions::new()
+                             .read(true)
+                             .open(&file_name) {
+        Err(e) => {
+            return Err(e);
+        },
+        Ok(f) => f,
+    };
+    match f.metadata() {
+        Err(e) => {
+            return Err(e)
+        },
+        Ok(m) => {
+            let meta = m.as_raw();
+            return Ok((meta.atime() * 1000 + (meta.atime_nsec() / 1_000_000),
+                       meta.mtime() * 1000 + (meta.mtime_nsec() / 1_000_000)));
+        },
+    };
+}
+
+
 
 
 fn decide_times(name: &String, flag_a: bool, flag_m: bool)
