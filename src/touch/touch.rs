@@ -12,12 +12,15 @@ use std::io::ErrorKind;
 
 
 static USAGE: &'static str = "
-Usage: touch [options] <file>...
+Usage:
+    touch [options] <file>...
+    touch --help
 
 Options:
     -a                  Change access time only
     -c, --no-create     Do not create any files
     -f                  (ignored)
+        --help          Display help message
     -m                  Change modification time only
         --time=<word>   change the specified time:
                             <word> is access, atime, or use: equivalent to -a
@@ -31,6 +34,7 @@ struct Args {
     flag_f: bool,
     flag_a : bool,
     flag_m: bool,
+    flag_help: bool,
     flag_time: String,
 }
 
@@ -39,6 +43,12 @@ fn main() {
     let args: Args = Docopt::new(USAGE)
                              .and_then(|d| d.decode())
                              .unwrap_or_else(|e| e.exit());
+
+    if args.flag_help {
+        println!("{}", USAGE);
+        return;
+        }
+
     let mut atime_flag: bool = args.flag_a;
     let mut mtime_flag: bool = args.flag_m;
 
