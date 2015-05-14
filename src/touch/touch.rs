@@ -11,20 +11,32 @@ use std::error::Error;
 use std::io::ErrorKind;
 
 
+static VERSION: &'static str = "touch (RUST implementation of GNU coreutils) 0.1
+Copyright (C) 2015 Marco Kaulea
+License GPLv2: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Marco 'don' Kaulea.
+";
+
+
 static USAGE: &'static str = "
 Usage:
     touch [options] <file>...
     touch --help
+    touch --version
 
 Options:
     -a                  Change access time only
     -c, --no-create     Do not create any files
     -f                  (ignored)
-        --help          Display help message
     -m                  Change modification time only
         --time=<word>   change the specified time:
                             <word> is access, atime, or use: equivalent to -a
                             <word> is modify or mtime: equivalent to -m
+        --help          Display this help message and exit
+        --version       Output version information and exit
 ";
 
 #[derive(RustcDecodable, Debug)]
@@ -36,6 +48,7 @@ struct Args {
     flag_m: bool,
     flag_help: bool,
     flag_time: String,
+    flag_version: bool,
 }
 
 
@@ -46,6 +59,10 @@ fn main() {
 
     if args.flag_help {
         println!("{}", USAGE);
+        return;
+        }
+    if args.flag_version {
+        println!("{}", VERSION);
         return;
         }
 
