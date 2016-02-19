@@ -20,9 +20,9 @@ Exit with a status code indicating failure.
     --version  output version information and exit";
 
 fn main() {
-    if env::args().count() == 2 {
-        let arg = env::args().nth(1).expect("Out of bounds");
-        match arg.as_ref() {
+    let args: Vec<_> = env::args().collect();
+    if args.len() == 2 {
+        match args[1].as_ref() {
             "--help" => println!("{}", HELP_MESSAGE),
             "--version" => println!("{}", VERSION),
             _ => (),
