@@ -1,5 +1,3 @@
-#![feature(exit_status)]
-#![feature(convert)]
 use std::env;
 
 static VERSION: &'static str = "false (RUST implementation of GNU coreutils) 0.1
@@ -22,13 +20,13 @@ Exit with a status code indicating failure.
     --version  output version information and exit";
 
 fn main() {
-    let args: Vec<_> = env::args().collect();
-    if args.len() == 2 {
-        match args[1].as_str() {
+    if env::args().count() == 2 {
+        let arg = env::args().nth(1).expect("Out of bounds");
+        match arg.as_ref() {
             "--help" => println!("{}", HELP_MESSAGE),
             "--version" => println!("{}", VERSION),
             _ => (),
         }
     }
-    std::env::set_exit_status(1);
+    std::process::exit(1);
 }
