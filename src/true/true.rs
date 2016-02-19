@@ -1,5 +1,3 @@
-#![feature(exit_status)]
-#![feature(convert)]
 use std::env;
 
 static VERSION: &'static str = "true (RUST implementation of GNU coreutils) 0.1
@@ -24,12 +22,12 @@ Written by Marco 'don' Kaulea.
 fn main() {
     let args: Vec<_> = env::args().collect();
     if args.len() == 2 {
-        match args[1].as_str() {
+        match args[1].as_ref() {
             "--help" => println!("{}", HELP_MESSAGE),
             "--version" => println!("{}", VERSION),
             _ => (),
         }
     }
 
-    std::env::set_exit_status(0);
+    std::process::exit(0);
 }
