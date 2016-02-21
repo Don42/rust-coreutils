@@ -1,4 +1,3 @@
-#![feature(collections)]
 extern crate getopts;
 use getopts::Options;
 use std::env;
@@ -12,7 +11,8 @@ fn main() {
         Err(f) => { panic!(f.to_string()) }
     };
 
-    for argument in args.tail() {
+    let words = args.split_first().expect("Error parsing arguments").1;
+    for argument in words {
         print!("{} ", argument);
     }
     if !matches.opt_present("n") {
