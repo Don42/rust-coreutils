@@ -1,11 +1,10 @@
-#![feature(fs_time,metadata_ext)]
 extern crate rustc_serialize;
 extern crate docopt;
 extern crate time;
 
 use docopt::Docopt;
 use std::fs::OpenOptions;
-use std::fs::set_file_times;
+//use std::fs::set_file_times;
 use std::os::unix::fs::MetadataExt;
 use std::error::Error;
 use std::io::ErrorKind;
@@ -32,11 +31,11 @@ Options:
     -c, --no-create     Do not create any files
     -f                  (ignored)
     -m                  Change modification time only
-        --time=<word>   change the specified time:
+    --time=<word>       change the specified time:
                             <word> is access, atime, or use: equivalent to -a
                             <word> is modify or mtime: equivalent to -m
-        --help          Display this help message and exit
-        --version       Output version information and exit
+    --help              Display this help message and exit
+    --version           Output version information and exit
 ";
 
 #[derive(RustcDecodable, Debug)]
@@ -113,10 +112,10 @@ fn touch_file(name: String, no_create: bool, flag_a: bool, flag_m: bool) {
         Ok((a, m)) => (a, m),
     };
 
-    match std::fs::set_file_times(std::path::Path::new(&name), atime, mtime) {
-        Err(e) => print_io_error(e.kind(), name, no_create),
-        Ok(_) => (),
-    };
+    //match std::fs::set_file_times(std::path::Path::new(&name), atime, mtime) {
+    //    Err(e) => print_io_error(e.kind(), name, no_create),
+    //    Ok(_) => (),
+    //};
 }
 
 
@@ -135,9 +134,8 @@ fn get_metadata(file_name: &String)
             return Err(e)
         },
         Ok(m) => {
-            let meta = m.as_raw();
-            return Ok((meta.atime() * 1000 + (meta.atime_nsec() / 1_000_000),
-                       meta.mtime() * 1000 + (meta.mtime_nsec() / 1_000_000)));
+            return Ok((m.atime() * 1000 + (m.atime_nsec() / 1_000_000),
+                       m.mtime() * 1000 + (m.mtime_nsec() / 1_000_000)));
         },
     };
 }
