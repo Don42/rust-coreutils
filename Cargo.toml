@@ -24,3 +24,7 @@ path = "src/touch/touch.rs"
 [[bin]]
 name = "true"
 path = "src/true/true.rs"
+
+[[bin]]
+name = "base64"
+path = "src/base64/base64.rs"
