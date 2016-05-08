@@ -1,13 +1,13 @@
 extern crate rustc_serialize;
 extern crate docopt;
 
+use std::io::{self, Read, Write};
 use std::error::Error;
 use std::fs::File;
-use std::io::prelude::*;
 use std::path::Path;
 
 use docopt::Docopt;
-use rustc_serialize::base64::{STANDARD, ToBase64};
+use rustc_serialize::base64::{STANDARD, ToBase64, FromBase64};
 
 static VERSION: &'static str = "base64 (RUST implementation of GNU coreutils) 0.1
 Copyright (C) 2015 Marco Kaulea
@@ -26,6 +26,7 @@ Usage:
     base64 --version
 
 Options:
+    -d --decode         Decode data
     --help              Display this help message and exit
     --version           Output version information and exit
 ";
@@ -33,6 +34,7 @@ Options:
 #[derive(RustcDecodable, Debug)]
 struct Args {
 	arg_file: Vec<String>,
+    flag_decode: bool,
 	flag_help: bool,
 	flag_version: bool,
 }
@@ -49,12 +51,18 @@ fn main() {
         println!("{}", VERSION);
         return;
         }
-	for name in args.arg_file {
-		print_base64(name);
-	}
+    if !args.flag_decode {
+        for name in args.arg_file {
+            encode_base64(name);
+        }
+    } else {
+        for name in args.arg_file {
+            decode_base64(name);
+        }
+    }
 }
 
-fn print_base64(file_name: String) {
+fn encode_base64(file_name: String) {
     let path = Path::new(&file_name);
     let display = path.display();
 
@@ -71,4 +79,25 @@ fn print_base64(file_name: String) {
         Ok(_) => print!("{}", s.to_base64(STANDARD)),
     }
     print!("\n")
+}
+
+fn decode_base64(file_name: String) {
+    let path = Path::new(&file_name);
+    let display = path.display();
+
+    let mut file = match File::open(&path) {
+        Err(why) => panic!("couldn't open {}: {}", display,
+                                                   Error::description(&why)),
+        Ok(file) => file,
+    };
+
+    let mut s = String::new();
+    match file.read_to_string(&mut s) {
+        Err(why) => panic!("couldn't read {}: {}", display,
+                                                   Error::description(&why)),
+        Ok(_) => {
+            let byte_array = s.from_base64().unwrap();
+            io::stdout().write(&byte_array).unwrap();
+        }
+    }
 }
