@@ -6,7 +6,6 @@ use docopt::Docopt;
 use std::fs::OpenOptions;
 //use std::fs::set_file_times;
 use std::os::unix::fs::MetadataExt;
-use std::error::Error;
 use std::io::ErrorKind;
 
 
