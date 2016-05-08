@@ -76,7 +76,11 @@ fn encode_base64(file_name: String) {
     match file.read_to_end(&mut s) {
         Err(why) => panic!("couldn't read {}: {}", display,
                                                    Error::description(&why)),
-        Ok(_) => print!("{}", s.to_base64(STANDARD)),
+        Ok(_) => {
+            let base64_string = s.to_base64(STANDARD);
+            io::stdout().write(base64_string.as_bytes()).unwrap();
+            // print!("{}", s.to_base64(STANDARD)),
+        }
     }
     print!("\n")
 }
