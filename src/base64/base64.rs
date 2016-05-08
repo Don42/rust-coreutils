@@ -54,20 +54,74 @@ fn main() {
 
     let file = args.arg_file.unwrap_or(String::from("-"));
     let output = match args.flag_decode {
-        true => vec![0],  // decode_base64(file),
+        true => decode_base64(file),
         false => encode_base64(file),
     };
     io::stdout().write(&output).unwrap();
 }
 
-fn read(file_name: &String) -> Option<Vec<u8>> {
+// TODO read_text, read_binary -> Result
+
+fn read_binary_from_stdin() -> io::Result<Vec<u8>> {
+    let mut buf = Vec::new();
+    match io::stdin().read_to_end(&mut buf) {
+        Ok(_) => return Ok(buf),
+        Err(why) => return Err(why),
+    }
+}
+
+fn read_text_from_stdin() -> io::Result<String> {
+    let mut buf = String::new();
+    match io::stdin().read_to_string(&mut buf) {
+        Ok(_) => return Ok(buf),
+        Err(why) => return Err(why),
+    }
+}
+
+fn read_binary_from_file(file_name: &String) -> io::Result<Vec<u8>> {
+    let path = Path::new(&file_name);
+
+    let mut file = match File::open(&path) {
+        Err(why) => return Err(why),
+        Ok(file) => file,
+    };
+    let mut buf = Vec::new();
+    match file.read_to_end(&mut buf) {
+        Err(why) => return Err(why),
+        Ok(_) => return Ok(buf),
+    }
+}
+
+fn read_text_from_file(file_name: &String) -> io::Result<String> {
+    let path = Path::new(&file_name);
+
+    let mut file = match File::open(&path) {
+        Err(why) => return Err(why),
+        Ok(file) => file,
+    };
+    let mut buf = String::new();
+    match file.read_to_string(&mut buf) {
+        Err(why) => return Err(why),
+        Ok(_) => return Ok(buf),
+    }
+}
+
+fn read_binary(file_name: &String) -> Option<Vec<u8>> {
     let path = Path::new(&file_name);
     let display = path.display();
 
     if file_name == "-" {
-        let mut buf = Vec::new();
-        return Some(buf);
+        match read_binary_from_stdin() {
+            Ok(buf) => return Some(buf),
+            Err(why) => panic!("Error reading from stdin: {}", Error::description(&why)),
+        }
     } else {
+        match read_binary_from_file(&file_name) {
+            Ok(buf) => return Some(buf),
+            Err(why) => panic!("Error reading from file {}: {}", display,
+                                                                 Error::description(&why)),
+        }
+        /*
         let mut file = match File::open(&path) {
             Err(why) => panic!("couldn't open {}: {}", display,
                                                        Error::description(&why)),
@@ -81,17 +135,39 @@ fn read(file_name: &String) -> Option<Vec<u8>> {
                 return Some(buf)
             }
         }
+        */
+    }
+}
+
+fn read_text(file_name: &String) -> Option<String> {
+    let path = Path::new(&file_name);
+    let display = path.display();
+
+    if file_name == "-" {
+        match read_text_from_stdin() {
+            Ok(buf) => return Some(buf),
+            Err(why) => panic!("Error reading from stdin: {}", Error::description(&why)),
+        }
+    } else {
+        match read_text_from_file(&file_name) {
+            Ok(buf) => return Some(buf),
+            Err(why) => panic!("Error reading from file {}: {}", display,
+                                                                 Error::description(&why)),
+        }
     }
 }
 
 
 fn encode_base64(file_name: String) -> Vec<u8> {
-    let path = Path::new(&file_name);
-    let display = path.display();
-
-	let mut base64_string = read(&file_name).unwrap().to_base64(STANDARD);
+	let mut base64_string = read_binary(&file_name).unwrap().to_base64(STANDARD);
 	base64_string.push('\n');
 	return base64_string.into_bytes();
+}
+
+fn decode_base64(file_name: String) -> Vec<u8> {
+    let base64_string = read_binary(&file_name).unwrap()
+                            .from_base64().unwrap();
+    return base64_string
 }
 
 /*
