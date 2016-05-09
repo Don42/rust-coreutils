@@ -21,7 +21,7 @@ Written by Marco 'don' Kaulea.
 
 static USAGE: &'static str = "
 Usage:
-    base64 [options] <file>...
+    base64 [options] [<file>]
     base64 --help
     base64 --version
 
@@ -33,7 +33,7 @@ Options:
 
 #[derive(RustcDecodable, Debug)]
 struct Args {
-	arg_file: Vec<String>,
+	arg_file: Option<String>,
     flag_decode: bool,
 	flag_help: bool,
 	flag_version: bool,
@@ -51,57 +51,66 @@ fn main() {
         println!("{}", VERSION);
         return;
         }
-    if !args.flag_decode {
-        for name in args.arg_file {
-            encode_base64(name);
+
+    let file = args.arg_file.unwrap_or(String::from("-"));
+    let output = match args.flag_decode {
+        true => decode_base64(file),
+        false => encode_base64(file),
+    };
+    io::stdout().write(&output).unwrap();
+}
+
+// TODO Exit code on error, formatting strings from errors
+
+fn read_binary_from_stdin() -> io::Result<Vec<u8>> {
+    let mut buf = Vec::new();
+    match io::stdin().read_to_end(&mut buf) {
+        Ok(_) => return Ok(buf),
+        Err(why) => return Err(why),
+    }
+}
+
+fn read_binary_from_file(file_name: &String) -> io::Result<Vec<u8>> {
+    let path = Path::new(&file_name);
+
+    let mut file = match File::open(&path) {
+        Err(why) => return Err(why),
+        Ok(file) => file,
+    };
+    let mut buf = Vec::new();
+    match file.read_to_end(&mut buf) {
+        Err(why) => return Err(why),
+        Ok(_) => return Ok(buf),
+    }
+}
+
+fn read_binary(file_name: &String) -> Option<Vec<u8>> {
+    let path = Path::new(&file_name);
+    let display = path.display();
+
+    if file_name == "-" {
+        match read_binary_from_stdin() {
+            Ok(buf) => return Some(buf),
+            Err(why) => panic!("Error reading from stdin: {}", Error::description(&why)),
         }
     } else {
-        for name in args.arg_file {
-            decode_base64(name);
+        match read_binary_from_file(&file_name) {
+            Ok(buf) => return Some(buf),
+            Err(why) => panic!("Error reading from file {}: {}", display,
+                                                                 Error::description(&why)),
         }
     }
 }
 
-fn encode_base64(file_name: String) {
-    let path = Path::new(&file_name);
-    let display = path.display();
 
-    let mut file = match File::open(&path) {
-        Err(why) => panic!("couldn't open {}: {}", display,
-                                                   Error::description(&why)),
-        Ok(file) => file,
-    };
-
-    let mut s = Vec::new();
-    match file.read_to_end(&mut s) {
-        Err(why) => panic!("couldn't read {}: {}", display,
-                                                   Error::description(&why)),
-        Ok(_) => {
-            let base64_string = s.to_base64(STANDARD);
-            io::stdout().write(base64_string.as_bytes()).unwrap();
-            // print!("{}", s.to_base64(STANDARD)),
-        }
-    }
-    print!("\n")
+fn encode_base64(file_name: String) -> Vec<u8> {
+	let mut base64_string = read_binary(&file_name).unwrap().to_base64(STANDARD);
+	base64_string.push('\n');
+	return base64_string.into_bytes();
 }
 
-fn decode_base64(file_name: String) {
-    let path = Path::new(&file_name);
-    let display = path.display();
-
-    let mut file = match File::open(&path) {
-        Err(why) => panic!("couldn't open {}: {}", display,
-                                                   Error::description(&why)),
-        Ok(file) => file,
-    };
-
-    let mut s = String::new();
-    match file.read_to_string(&mut s) {
-        Err(why) => panic!("couldn't read {}: {}", display,
-                                                   Error::description(&why)),
-        Ok(_) => {
-            let byte_array = s.from_base64().unwrap();
-            io::stdout().write(&byte_array).unwrap();
-        }
-    }
+fn decode_base64(file_name: String) -> Vec<u8> {
+    let base64_string = read_binary(&file_name).unwrap()
+                            .from_base64().unwrap();
+    return base64_string
 }
