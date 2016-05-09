@@ -60,19 +60,11 @@ fn main() {
     io::stdout().write(&output).unwrap();
 }
 
-// TODO read_text, read_binary -> Result
+// TODO Exit code on error, formatting strings from errors
 
 fn read_binary_from_stdin() -> io::Result<Vec<u8>> {
     let mut buf = Vec::new();
     match io::stdin().read_to_end(&mut buf) {
-        Ok(_) => return Ok(buf),
-        Err(why) => return Err(why),
-    }
-}
-
-fn read_text_from_stdin() -> io::Result<String> {
-    let mut buf = String::new();
-    match io::stdin().read_to_string(&mut buf) {
         Ok(_) => return Ok(buf),
         Err(why) => return Err(why),
     }
@@ -87,20 +79,6 @@ fn read_binary_from_file(file_name: &String) -> io::Result<Vec<u8>> {
     };
     let mut buf = Vec::new();
     match file.read_to_end(&mut buf) {
-        Err(why) => return Err(why),
-        Ok(_) => return Ok(buf),
-    }
-}
-
-fn read_text_from_file(file_name: &String) -> io::Result<String> {
-    let path = Path::new(&file_name);
-
-    let mut file = match File::open(&path) {
-        Err(why) => return Err(why),
-        Ok(file) => file,
-    };
-    let mut buf = String::new();
-    match file.read_to_string(&mut buf) {
         Err(why) => return Err(why),
         Ok(_) => return Ok(buf),
     }
@@ -121,39 +99,6 @@ fn read_binary(file_name: &String) -> Option<Vec<u8>> {
             Err(why) => panic!("Error reading from file {}: {}", display,
                                                                  Error::description(&why)),
         }
-        /*
-        let mut file = match File::open(&path) {
-            Err(why) => panic!("couldn't open {}: {}", display,
-                                                       Error::description(&why)),
-            Ok(file) => file,
-        };
-        let mut buf = Vec::new();
-        match file.read_to_end(&mut buf) {
-            Err(why) => panic!("couldn't read {}: {}", display,
-                                                       Error::description(&why)),
-            Ok(_) => {
-                return Some(buf)
-            }
-        }
-        */
-    }
-}
-
-fn read_text(file_name: &String) -> Option<String> {
-    let path = Path::new(&file_name);
-    let display = path.display();
-
-    if file_name == "-" {
-        match read_text_from_stdin() {
-            Ok(buf) => return Some(buf),
-            Err(why) => panic!("Error reading from stdin: {}", Error::description(&why)),
-        }
-    } else {
-        match read_text_from_file(&file_name) {
-            Ok(buf) => return Some(buf),
-            Err(why) => panic!("Error reading from file {}: {}", display,
-                                                                 Error::description(&why)),
-        }
     }
 }
 
@@ -169,28 +114,3 @@ fn decode_base64(file_name: String) -> Vec<u8> {
                             .from_base64().unwrap();
     return base64_string
 }
-
-/*
-fn decode_base64(file_name: String) -> Vec<u8> {
-    let mut file = match file_name {
-        Some(file_name) => {
-            let path = Path::new(&file_name);
-    // let path = Path::new(file_name.unwrap());
-            let display = path.display();
-            match File::open(&path) {
-                Err(why) => panic!("couldn't open {}: {}", display,
-                                                           Error::description(&why)),
-                Ok(file) => file,
-            }
-        },
-        None => io::stdin(),
-    };
-
-    let mut s = String::new();
-    match file.read_to_string(&mut s) {
-        Err(why) => panic!("couldn't read {}: {}", display,
-                                                   Error::description(&why)),
-        Ok(_) => return s.from_base64().unwrap(),
-    }
-}
-*/
