@@ -1,16 +1,19 @@
+// Crates
 extern crate rustc_serialize;
 extern crate docopt;
 
+// Standard library imports
 use std::io::{self, Read, Write};
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
 
+// Crate imports
 use docopt::Docopt;
 use rustc_serialize::base64::{STANDARD, ToBase64, FromBase64};
 
 static VERSION: &'static str = "base64 (RUST implementation of GNU coreutils) 0.1
-Copyright (C) 2015 Marco Kaulea
+Copyright (C) 2016 Marco Kaulea
 License GPLv2: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
