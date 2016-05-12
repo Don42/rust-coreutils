@@ -1,12 +1,16 @@
+// Crates
 extern crate rustc_serialize;
 extern crate docopt;
 extern crate time;
 
-use docopt::Docopt;
+// Standard library imports
 use std::fs::OpenOptions;
 //use std::fs::set_file_times;
 use std::os::unix::fs::MetadataExt;
 use std::io::ErrorKind;
+
+// Crate imports
+use docopt::Docopt;
 
 
 static VERSION: &'static str = "touch (RUST implementation of GNU coreutils) 0.1
@@ -123,15 +127,11 @@ fn get_metadata(file_name: &String)
     let f = match OpenOptions::new()
                              .read(true)
                              .open(&file_name) {
-        Err(e) => {
-            return Err(e);
-        },
+        Err(e) => return Err(e),
         Ok(f) => f,
     };
     match f.metadata() {
-        Err(e) => {
-            return Err(e)
-        },
+        Err(e) => return Err(e),
         Ok(m) => {
             return Ok((m.atime() * 1000 + (m.atime_nsec() / 1_000_000),
                        m.mtime() * 1000 + (m.mtime_nsec() / 1_000_000)));

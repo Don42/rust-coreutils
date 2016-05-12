@@ -1,6 +1,11 @@
+// Crates
 extern crate getopts;
-use getopts::Options;
+
+// Standard libaray imports
 use std::env;
+
+// Crate imports
+use getopts::Options;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

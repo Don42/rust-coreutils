@@ -115,5 +115,5 @@ fn encode_base64(file_name: String) -> Vec<u8> {
 fn decode_base64(file_name: String) -> Vec<u8> {
     let base64_string = read_binary(&file_name).unwrap()
                             .from_base64().unwrap();
-    return base64_string
+    return base64_string;
 }
