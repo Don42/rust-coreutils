@@ -2,7 +2,7 @@
 name = "rust-coreutils"
 version = "0.0.1"
 dependencies = [
- "docopt 0.6.78 (registry+https://github.com/rust-lang/crates.io-index)",
+ "docopt 0.6.80 (registry+https://github.com/rust-lang/crates.io-index)",
  "getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.34 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -18,7 +18,7 @@ dependencies = [
 
 [[package]]
 name = "docopt"
-version = "0.6.78"
+version = "0.6.80"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "regex 0.1.52 (registry+https://github.com/rust-lang/crates.io-index)",
