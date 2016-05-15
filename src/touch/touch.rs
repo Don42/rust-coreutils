@@ -59,10 +59,6 @@ fn main() {
                              .and_then(|d| d.decode())
                              .unwrap_or_else(|e| e.exit());
 
-    if args.flag_help {
-        println!("{}", USAGE);
-        return;
-        }
     if args.flag_version {
         println!("{}", VERSION);
         return;
