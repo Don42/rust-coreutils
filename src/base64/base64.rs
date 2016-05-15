@@ -10,7 +10,7 @@ use std::path::Path;
 
 // Crate imports
 use docopt::Docopt;
-use rustc_serialize::base64::{STANDARD, ToBase64, FromBase64};
+use rustc_serialize::base64::{self, ToBase64, FromBase64};
 
 static VERSION: &'static str = "base64 (RUST implementation of GNU coreutils) 0.1
 Copyright (C) 2016 Marco Kaulea
@@ -30,6 +30,8 @@ Usage:
 
 Options:
     -d --decode         Decode data
+    -w --wrap=COLS      Wrap encoded lines after COLS character (default 76).
+                        Use 0 to disable line wrapping.
     --help              Display this help message and exit
     --version           Output version information and exit
 ";
@@ -38,6 +40,7 @@ Options:
 struct Args {
 	arg_file: Option<String>,
     flag_decode: bool,
+    flag_wrap: Option<usize>,
 	flag_help: bool,
 	flag_version: bool,
 }
@@ -54,11 +57,19 @@ fn main() {
         println!("{}", VERSION);
         return;
         }
+    let line_wrap = match args.flag_wrap {
+        None => Some(76),
+        Some(lines) => match lines {
+                0 => None,
+                _ => Some(lines),
+        },
+    };
+
 
     let file = args.arg_file.unwrap_or(String::from("-"));
     let output = match args.flag_decode {
         true => decode_base64(file),
-        false => encode_base64(file),
+        false => encode_base64(file, line_wrap),
     };
     io::stdout().write(&output).unwrap();
 }
@@ -106,8 +117,14 @@ fn read_binary(file_name: &String) -> Option<Vec<u8>> {
 }
 
 
-fn encode_base64(file_name: String) -> Vec<u8> {
-	let mut base64_string = read_binary(&file_name).unwrap().to_base64(STANDARD);
+fn encode_base64(file_name: String, line_wrap: Option<usize>) -> Vec<u8> {
+    let base64_conf = base64::Config {
+        char_set: base64::Standard,
+        newline: base64::Newline::LF,
+        pad: true,
+        line_length: line_wrap,
+    };
+	let mut base64_string = read_binary(&file_name).unwrap().to_base64(base64_conf);
 	base64_string.push('\n');
 	return base64_string.into_bytes();
 }
