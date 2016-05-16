@@ -139,9 +139,8 @@ fn convert(nday: u16, nyear: i32) -> Option<DiscordianTime> {
 
 
 fn is_leap_year(year_ce: i32) -> bool{
-    return year_ce % 4 == 0 &&
-           year_ce % 100 != 0 ||
-           year_ce % 400 == 0
+    let has_factor = |n| year_ce % n == 0;
+    return has_factor(4) && !has_factor(100) || has_factor(400)
 }
 
 
