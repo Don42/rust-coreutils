@@ -29,6 +29,9 @@ path = "src/true/true.rs"
 name = "base64"
 path = "src/base64/base64.rs"
 
+[lib]
+name = "libddate"
+path = "src/ddate/mod.rs"
 [[bin]]
 name = "ddate"
-path = "src/ddate/ddate.rs"
+path = "src/ddate/main.rs"
