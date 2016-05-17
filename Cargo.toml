@@ -8,6 +8,7 @@ getopts = "0.2.10"
 docopt = "*"
 rustc-serialize = "*"
 time = "*"
+chrono = "0.2"
 
 [[bin]]
 name = "echo"
