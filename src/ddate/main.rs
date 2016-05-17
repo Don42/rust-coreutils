@@ -1,4 +1,5 @@
 // Crates
+extern crate chrono;
 extern crate docopt;
 extern crate rustc_serialize;
 extern crate time;
@@ -7,6 +8,7 @@ extern crate libddate;
 // Standard library imports
 
 //Crate imports
+use chrono::{NaiveDate, Datelike};
 use docopt::Docopt;
 use libddate::ddate;
 
@@ -26,6 +28,7 @@ ddate
 
 USAGE:
     ddate [options] [<timestamp>]
+    ddate [options] date <date>
 
 Options:
     --help          Dispaly this help message and exit
@@ -35,6 +38,7 @@ Options:
 #[derive(Debug, RustcDecodable)]
 struct Args {
     arg_timestamp: Option<i64>,
+    arg_date: Option<String>,
     flag_help: bool,
     flag_version: bool,
 }
@@ -47,12 +51,19 @@ fn main() {
         println!("{}", VERSION);
         return;
         }
-    let greg_date = match args.arg_timestamp {
-        Some(t) => time::at(time::Timespec {sec: t, nsec: 0}),
-        None => time::now(),
+    let date = if args.arg_date.is_some() {
+        let input_date = NaiveDate::parse_from_str(args.arg_date.unwrap().as_str(),
+                                                   "%Y-%m-%d").unwrap();
+        ddate::convert(input_date.ordinal0() as u16,
+                       input_date.year() as i32).unwrap()
+    } else {
+        let greg_date = match args.arg_timestamp {
+            Some(t) => time::at(time::Timespec {sec: t, nsec: 0}),
+            None => time::now(),
+        };
+        ddate::convert(greg_date.tm_yday as u16,
+                                  greg_date.tm_year + YEAR_OFFSET).unwrap()
     };
-    let date = ddate::convert(greg_date.tm_yday as u16,
-							  greg_date.tm_year + YEAR_OFFSET).unwrap();
     println!("{:?}, ", date);
 }
 
