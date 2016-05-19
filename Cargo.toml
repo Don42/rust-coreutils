@@ -8,7 +8,6 @@ getopts = "0.2.10"
 docopt = "*"
 rustc-serialize = "*"
 time = "*"
-chrono = "0.2"
 
 [[bin]]
 name = "echo"
@@ -29,10 +28,3 @@ path = "src/true/true.rs"
 [[bin]]
 name = "base64"
 path = "src/base64/base64.rs"
-
-[lib]
-name = "libddate"
-path = "src/ddate/mod.rs"
-[[bin]]
-name = "ddate"
-path = "src/ddate/main.rs"
